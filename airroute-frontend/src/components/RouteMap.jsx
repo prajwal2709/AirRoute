@@ -150,8 +150,89 @@ function RouteMap({
     ];
 
 
+  /* ================================
+     GOOGLE MAPS DIRECTIONS
+  ================================= */
+
+
+  
+  const openGoogleMaps = () => {
+
+  if (
+    !selectedRoute?.geometry?.coordinates ||
+    selectedRoute.geometry.coordinates.length < 2
+  ) {
+    return;
+  }
+
+  // Get the actual AirRoute route coordinates
+  const routeCoordinates =
+    selectedRoute.geometry.coordinates;
+
+  // First coordinate = actual route origin
+  const [originLongitude, originLatitude] =
+    routeCoordinates[0];
+
+  // Last coordinate = actual route destination
+  const [
+    destinationLongitude,
+    destinationLatitude
+  ] =
+    routeCoordinates[
+      routeCoordinates.length - 1
+    ];
+    console.log("========== AIRROUTE DEBUG ==========");
+
+console.log(
+  "Route START:",
+  routeCoordinates[0]
+);
+
+console.log(
+  "Route END:",
+  routeCoordinates[routeCoordinates.length - 1]
+);
+
+console.log(
+  "Current Location:",
+  currentLocation
+);
+
+console.log(
+  "Selected Route:",
+  selectedRoute
+);
+
+console.log("====================================");
+
+  const googleMapsUrl =
+    `https://www.google.com/maps/dir/?api=1` +
+    `&origin=${originLatitude},${originLongitude}` +
+    `&destination=${destinationLatitude},${destinationLongitude}` +
+    `&travelmode=driving`;
+
+  window.open(
+    googleMapsUrl,
+    "_blank",
+    "noopener,noreferrer"
+  );
+};
+
   return (
     <div className="map-container">
+
+
+      {/* ================================
+          GOOGLE MAPS NAVIGATION BUTTON
+      ================================= */}
+
+      <button
+        className="directions-button"
+        onClick={openGoogleMaps}
+        type="button"
+      >
+        Navigate with Google Maps
+      </button>
 
 
       {/* ================================
@@ -262,18 +343,18 @@ function RouteMap({
           MAP
       ================================= */}
 
-        <MapContainer
-  center={
-    currentLocation
-      ? [
-          currentLocation.latitude,
-          currentLocation.longitude
-        ]
-      : selectedCoordinates[0]
-  }
-  zoom={13}
-  className="airroute-map"
->
+      <MapContainer
+        center={
+          currentLocation
+            ? [
+                currentLocation.latitude,
+                currentLocation.longitude
+              ]
+            : selectedCoordinates[0]
+        }
+        zoom={13}
+        className="airroute-map"
+      >
 
 
         {/* ================================

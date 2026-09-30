@@ -257,22 +257,76 @@ function App() {
   // --------------------------------
 
   return (
-    <div className="app">
+  <div className="app">
 
-      <header className="header">
-        <h1>AirRoute</h1>
-        <p>
-          Pollution-Aware Navigation
-        </p>
-      </header>
+    {/* ================================
+        HEADER
+    ================================= */}
 
-      <main className="container">
+    <header className="header">
 
-        <section className="route-form">
+      <div className="brand">
+
+        <div className="brand-icon">
+          🍃
+        </div>
+
+        <div>
+          <h1>
+            AirRoute
+          </h1>
+
+          <p>
+            Pollution-aware navigation
+          </p>
+        </div>
+
+      </div>
+
+      <div className="header-status">
+        <span className="status-dot"></span>
+        Live location
+      </div>
+
+    </header>
+
+
+    <main className="container">
+
+
+      {/* ================================
+          HERO / SEARCH
+      ================================= */}
+
+      <section className="hero">
+
+        <div className="hero-content">
+
+          <span className="hero-eyebrow">
+            SMART MOBILITY
+          </span>
+
+          <h2>
+            Breathe better.
+            <br />
+            Travel smarter.
+          </h2>
+
+          <p>
+            Find routes that balance travel time,
+            distance and pollution exposure.
+          </p>
+
+        </div>
+
+
+        <div className="route-form">
 
           <div className="input-group">
+
             <label>
-              Source
+              <span>📍</span>
+              Starting point
             </label>
 
             <input
@@ -284,140 +338,353 @@ function App() {
               }
               readOnly
             />
+
           </div>
 
+
           <div className="input-group">
+
             <label>
+              <span>📌</span>
               Destination
             </label>
 
             <input
               type="text"
-              placeholder="Enter destination"
+              placeholder="Where do you want to go?"
               value={destination}
               onChange={(e) =>
                 setDestination(
                   e.target.value
                 )
               }
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  !loading &&
+                  !locationLoading
+                ) {
+                  handleFindRoute();
+                }
+              }}
             />
+
           </div>
 
+
           <button
+            className="find-route-button"
             onClick={handleFindRoute}
             disabled={
               loading ||
               locationLoading
             }
           >
+
             {loading
-              ? "Finding Route..."
-              : "Find Route"}
+              ? "Analyzing..."
+              : "Find Cleaner Route →"}
+
           </button>
 
-        </section>
+        </div>
 
-        {/* LOCATION ERROR */}
+      </section>
 
-        {locationError && (
-          <div className="error">
-            {locationError}
-          </div>
-        )}
 
-        {/* ROUTE ERROR */}
+      {/* ================================
+          ERRORS
+      ================================= */}
 
-        {error && (
-          <div className="error">
-            {error}
-          </div>
-        )}
+      {locationError && (
+        <div className="error">
+          ⚠️ {locationError}
+        </div>
+      )}
 
-        {/* REMAINING DISTANCE */}
+      {error && (
+        <div className="error">
+          ⚠️ {error}
+        </div>
+      )}
 
-        {remainingDistance !== null && (
-          <div className="remaining-distance">
 
-            <span>
-              Distance remaining
-            </span>
+      {/* ================================
+          NAVIGATION STATUS
+      ================================= */}
+
+      {distanceFromRoute !== null && (
+
+        <div
+          className={`navigation-status ${
+            isOffRoute
+              ? "off-route"
+              : "on-route"
+          }`}
+        >
+
+          <div>
 
             <strong>
-              {(
-                remainingDistance / 1000
-              ).toFixed(2)} km
+              {isOffRoute
+                ? "⚠️ Off route"
+                : "✓ On route"}
             </strong>
 
-          </div>
-        )}
-
-        {/* NAVIGATION STATUS */}
-
-        {distanceFromRoute !== null && (
-          <div className="navigation-status">
-
-            {isOffRoute ? (
-              <>
-                <strong>
-                  ⚠️ Off route
-                </strong>
-
-                <span>
-                  You are{" "}
-                  {Math.round(
+            <span>
+              {isOffRoute
+                ? `You are ${Math.round(
                     distanceFromRoute
-                  )}
-                  m away from the
-                  planned route.
-                </span>
-              </>
-            ) : (
-              <>
-                <strong>
-                  ✓ On route
-                </strong>
-
-                <span>
-                  You are following the
-                  planned route.
-                </span>
-              </>
-            )}
+                  )}m away from the planned route.`
+                : "You are following the planned route."}
+            </span>
 
           </div>
-        )}
 
-        {/* ROUTES */}
+          {remainingDistance !== null && (
 
-        {routes.length > 0 && (
-          <>
-            <RouteInfo
-              routes={routes}
-              selectedRoute={
-                selectedRoute
-              }
-              onSelectRoute={(route) => {
-                offRouteCount.current = 0;
-                setSelectedRoute(route);
-              }}
-            />
+            <div className="remaining-pill">
 
-            <RouteMap
-              routes={routes}
-              selectedRoute={
-                selectedRoute
-              }
-              currentLocation={
-                currentLocation
-              }
-            />
-          </>
-        )}
+              <span>
+                Remaining
+              </span>
 
-      </main>
+              <strong>
+                {(
+                  remainingDistance / 1000
+                ).toFixed(2)} km
+              </strong>
+
+            </div>
+
+          )}
+
+        </div>
+
+      )}
+
+
+      {/* ================================
+          MAP
+      ================================= */}
+    {/* =====================================================
+    MAP + ROUTE OPTIONS
+===================================================== */}
+
+{routes.length > 0 && (
+  <section className="navigation-layout">
+
+    {/* =========================
+        LEFT — MAP
+    ========================= */}
+
+    <div className="map-panel">
+
+      <div className="section-heading map-heading">
+
+        <div>
+          <span className="section-eyebrow">
+            LIVE ROUTE
+          </span>
+
+          <h2>
+            Pollution-aware map
+          </h2>
+        </div>
+
+        <span className="live-badge">
+          ● LIVE
+        </span>
+
+      </div>
+
+      <RouteMap
+        routes={routes}
+        selectedRoute={selectedRoute}
+        currentLocation={currentLocation}
+      />
 
     </div>
-  );
-}
 
+
+    {/* =========================
+        RIGHT — ROUTE OPTIONS
+    ========================= */}
+
+    <div className="routes-panel">
+
+      <div className="section-heading">
+
+        <div>
+          <span className="section-eyebrow">
+            ROUTE OPTIONS
+          </span>
+
+          <h2>
+            Compare your routes
+          </h2>
+
+          <p className="section-description">
+            Choose a route based on travel time,
+            distance and pollution exposure.
+          </p>
+        </div>
+
+        <span className="selected-label">
+          {routes.length}{" "}
+          {routes.length === 1 ? "route" : "routes"}
+        </span>
+
+      </div>
+
+
+      <RouteInfo
+        routes={routes}
+        selectedRoute={selectedRoute}
+        onSelectRoute={(route) => {
+
+          offRouteCount.current = 0;
+
+          setSelectedRoute(route);
+
+        }}
+      />
+
+    </div>
+
+  </section>
+)}
+
+
+{/* =====================================================
+    SELECTED ROUTE SUMMARY
+===================================================== */}
+
+{selectedRoute && (
+  <section className="summary-section">
+
+    <div className="section-heading">
+
+      <div>
+        <span className="section-eyebrow">
+          ROUTE INSIGHTS
+        </span>
+
+        <h2>
+          Your selected route
+        </h2>
+      </div>
+
+      <span className="selected-label">
+        ✓ Selected
+      </span>
+
+    </div>
+
+
+    <div className="summary-grid">
+
+      <div className="summary-card">
+
+        <span>
+          DISTANCE
+        </span>
+
+        <strong>
+          {(selectedRoute.distance / 1000).toFixed(2)}
+          <small> km</small>
+        </strong>
+
+        <p>
+          Total route distance
+        </p>
+
+      </div>
+
+
+      <div className="summary-card">
+
+        <span>
+          TRAVEL TIME
+        </span>
+
+        <strong>
+          {(selectedRoute.duration / 60).toFixed(1)}
+          <small> min</small>
+        </strong>
+
+        <p>
+          Estimated driving time
+        </p>
+
+      </div>
+
+
+      <div className="summary-card">
+
+        <span>
+          AVERAGE PM2.5
+        </span>
+
+        <strong>
+          {Number(selectedRoute.averagepm25).toFixed(1)}
+          <small> μg/m³</small>
+        </strong>
+
+        <p>
+          Along the selected route
+        </p>
+
+      </div>
+
+
+      <div className="summary-card accent-card">
+
+        <span>
+          AIRROUTE SCORE
+        </span>
+
+        <strong>
+          {Number(selectedRoute.finalScore).toFixed(1)}
+        </strong>
+
+        <p>
+          Route optimization score
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+)}
+
+      
+
+
+      {/* ================================
+          ROUTES
+      ================================= */}
+
+      {routes.length > 0 && (
+
+        <RouteInfo
+          routes={routes}
+          selectedRoute={selectedRoute}
+          onSelectRoute={(route) => {
+
+            offRouteCount.current = 0;
+
+            setSelectedRoute(route);
+
+          }}
+        />
+
+      )}
+
+    </main>
+
+  </div>
+);
+}
 export default App;
